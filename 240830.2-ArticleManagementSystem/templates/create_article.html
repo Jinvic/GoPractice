@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>create article</title>
+</head>
+
+<body>
+    <form action="/create_article" method="POST">
+        <div>
+            <label>标题:</label>
+            <input type="text" name="title" required>
+        </div>
+        <div>
+            <label>作者:</label>
+            <input type="text" name="author" required>
+        </div>
+        <div>
+            <input type="text" name="content" placeholder="文章内容" required>
+        </div>
+        <button type="submit">提交</button>
+    </form>
+</body>
+
+</html>
