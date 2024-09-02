@@ -22,10 +22,18 @@ func main() {
 
 	page := route.Group("/page")
 	{
-		page.GET("/:page_name", func(ctx *gin.Context) {
+		page.GET("/create_article", func(ctx *gin.Context) {
 			route.LoadHTMLGlob("./templates/*")
-			page_name := ctx.Param("page_name")
-			ctx.HTML(http.StatusOK, page_name+".html", nil)
+			ctx.HTML(http.StatusOK, "create_article.html", nil)
+		})
+		page.GET("/update_article/:article_id", func(ctx *gin.Context) {
+			route.LoadHTMLGlob("./templates/*")
+			articleIDstr := ctx.Param("article_id")
+			articleID, _ := strconv.Atoi(articleIDstr)
+			article := getArticle(uint(articleID))
+			ctx.HTML(http.StatusOK, "update_article.html", gin.H{
+				"article": article,
+			})
 		})
 	}
 
@@ -57,9 +65,20 @@ func main() {
 		})
 	})
 
-	route.GET("/update_article", func(ctx *gin.Context) {
+	route.POST("/update_article", func(ctx *gin.Context) {
 
+		articleIDstr := ctx.PostForm("id")
+		articleIDint, _ := strconv.Atoi(articleIDstr)
+		articleID := uint(articleIDint)
+		upds := map[string]interface{}{
+			"title":   ctx.PostForm("title"),
+			"content": ctx.PostForm("content"),
+			"author":  ctx.PostForm("author"),
+		}
+		updateArticle(articleID, upds)
+		ctx.Redirect(http.StatusSeeOther, "/article/"+articleIDstr)
 	})
+
 	route.GET("/delete_article", func(ctx *gin.Context) {
 
 	})

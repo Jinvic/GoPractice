@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>update article</title>
+</head>
+
+<body>
+    <form action="/update_article" method="POST">
+        <div>
+            <label>ID:</label>
+            <input type="text" name="id" required value={{.article.ID}} readonly>
+        </div>
+        <div>
+            <label>标题:</label>
+            <input type="text" name="title" required value={{.article.Title}}>
+        </div>
+        <div>
+            <label>作者:</label>
+            <input type="text" name="author" required value="{{.article.Author}}">
+        </div>
+        <div>
+            <input type="text" name="content" value={{.article.Content}} required>
+        </div>
+        <button type="submit">更新</button>
+    </form>
+</body>
+
+</html>

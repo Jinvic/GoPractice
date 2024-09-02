@@ -43,7 +43,7 @@ func getArticle(articleID uint) (article Article) {
 }
 
 func updateArticle(articleID uint, upds map[string]interface{}) {
-	db.Model(&Article{}).Where("article_id = ?", articleID).Updates(upds)
+	db.Model(&Article{}).Where("id = ?", articleID).Updates(upds)
 }
 
 func deleteArticle(articleID uint) {
@@ -53,7 +53,7 @@ func deleteArticle(articleID uint) {
 func visitArticle(times int, articleID uint) {
 	var visited int
 	db.Model(&Article{}).Select("visited").Find(&visited, articleID)
-	db.Model(&Article{}).Where("article_id = ?", articleID).Update("visited", visited+times)
+	db.Model(&Article{}).Where("id = ?", articleID).Update("visited", visited+times)
 }
 
 func popularArticles(num int) (articles []Article) {
