@@ -9,10 +9,11 @@ import (
 
 type Article struct {
 	gorm.Model
-	Title   string
-	Content string
-	Author  string
-	Visited int
+	ID      uint   `gorm:"primary key" redis:"id"`
+	Title   string `redis:"title"`
+	Content string `redis:"content"`
+	Author  string `redis:"author"`
+	Visited int    `redis:"visited"`
 }
 
 var db *gorm.DB
@@ -30,6 +31,7 @@ func init() {
 
 func createArticle(article *Article) {
 	db.Create(article)
+	createArticleR(article.ID)
 }
 
 func getAllArticles() (articles []Article) {
@@ -37,13 +39,28 @@ func getAllArticles() (articles []Article) {
 	return
 }
 
+func getPopularArticles() (articles []Article) {
+	articles = getPopularArticlesR()
+	return
+}
+
 func getArticle(articleID uint) (article Article) {
-	db.First(&article, articleID)
+	visitArticleR(articleID)
+	if isCached(articleID) {
+		fmt.Println("get article from cache")
+		article = getArticleR(articleID)
+	} else {
+		fmt.Println("get article from db")
+		db.First(&article, articleID)
+	}
 	return
 }
 
 func updateArticle(articleID uint, upds map[string]interface{}) {
 	db.Model(&Article{}).Where("id = ?", articleID).Updates(upds)
+	if isCached(articleID) {
+		updateArticleR(articleID, upds)
+	}
 }
 
 func updateVisited(articleID uint, visited int) {
@@ -52,6 +69,7 @@ func updateVisited(articleID uint, visited int) {
 
 func deleteArticle(articleID uint) {
 	db.Delete(&Article{}, articleID)
+	deleteArticleR(articleID)
 }
 
 // func visitArticle(times int, articleID uint) {

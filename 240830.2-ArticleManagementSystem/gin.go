@@ -59,8 +59,7 @@ func main() {
 		route.LoadHTMLGlob("./templates/*")
 		articleIDstr := ctx.Param("article_id")
 		articleID, _ := strconv.Atoi(articleIDstr)
-		// article := getArticle(uint(articleID))
-		article := visitArticleR(uint(articleID))
+		article := getArticle(uint(articleID))
 		ctx.HTML(http.StatusOK, "article.html", gin.H{
 			"article": article,
 		})
@@ -88,7 +87,11 @@ func main() {
 	})
 
 	route.GET("/popular_articles", func(ctx *gin.Context) {
-
+		route.LoadHTMLGlob("./templates/*")
+		articles := getPopularArticles()
+		ctx.HTML(http.StatusOK, "all_articles.html", gin.H{
+			"articles": articles,
+		})
 	})
 
 	route.Run(":8080")

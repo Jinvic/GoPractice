@@ -26,7 +26,6 @@ func init() {
 		return
 	}
 	fmt.Println("连接成功:", pong)
-	defer rdb.Close()
 
 	articles := getAllArticles()
 
@@ -44,10 +43,9 @@ func init() {
 
 	// 缓存前n篇文章
 	articleIDsToCache, _ := rdb.ZRevRange(ctx, "visited", 0, 10).Result()
-	// fmt.Println(articlesToCache)
 	for _, idstr := range articleIDsToCache {
 		id, _ := strconv.Atoi(idstr)
-		rdb.HSet(ctx, "articles:"+string(id), articles[idtoi[uint(id)]])
+		rdb.HSet(ctx, "articles:"+idstr, articles[idtoi[uint(id)]])
 		rdb.SAdd(ctx, "cached_ids", uint(id))
 	}
 
@@ -56,19 +54,21 @@ func init() {
 	// 退出前手动同步一次
 	defer syncVisited()
 
+	go autoUpdateCachedArticles()
+	defer updateCachedArticles()
+
 }
 
 // 定时同步数据到数据库
 func autoSyncVisited() {
 	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
+	// defer ticker.Stop()
 
 	go func() {
 		for range ticker.C {
 			syncVisited()
 		}
 	}()
-	select {}
 }
 
 // 进行一次同步
@@ -76,17 +76,16 @@ func syncVisited() {
 	var cursor uint64
 	for {
 		// 获取成员
-		var idstrs []string
-		idstrs, cursor, _ = rdb.ZScan(ctx, "visited", 0, "*", 10).Result()
-
+		var res []string
+		res, cursor, _ = rdb.ZScan(ctx, "visited", 0, "*", 10).Result()
 		//遍历成员
-		for _, idstr := range idstrs {
+		for i := 0; i < len(res); i += 2 {
 			//获取id
-			id, _ := strconv.Atoi(idstr)
+			idint, _ := strconv.Atoi(res[i])
 			//获取访问次数
-			visitedfloat, _ := rdb.ZScore(ctx, "visited", "idstr").Result()
+			visitedfloat, _ := strconv.Atoi(res[i+1])
 			// 更新访问次数
-			updateVisited(uint(id), int(visitedfloat))
+			updateVisited(uint(idint), int(visitedfloat))
 		}
 
 		if cursor == 0 {
@@ -98,14 +97,13 @@ func syncVisited() {
 // 定时更新缓存的文章
 func autoUpdateCachedArticles() {
 	ticker := time.NewTicker(1 * time.Hour)
-	defer ticker.Stop()
+	// defer ticker.Stop()
 
 	go func() {
 		for range ticker.C {
 			updateCachedArticles()
 		}
 	}()
-	select {}
 }
 
 // 进行一次更新
@@ -138,5 +136,53 @@ func updateCachedArticles() {
 }
 
 func visitArticleR(articleID uint) {
-	rdb.ZIncrBy(ctx, "visited", 1.0, string(articleID))
+	rdb.ZIncrBy(ctx, "visited", 1.0, strconv.Itoa(int(articleID)))
+}
+
+func createArticleR(articleID uint) {
+	rdb.ZAdd(ctx, "visited", redis.Z{
+		Score:  0,
+		Member: articleID,
+	})
+}
+
+func deleteArticleR(articleID uint) {
+	rdb.ZRem(ctx, "visited", strconv.Itoa(int(articleID)))
+	if isCached(articleID) {
+		rdb.SRem(ctx, "cached_ids", articleID)
+		rdb.Del(ctx, "articles:"+strconv.Itoa(int(articleID)))
+		updateCachedArticles()
+	}
+}
+
+func updateArticleR(articleID uint, upds map[string]interface{}) {
+	rdb.HSet(ctx, "articles:"+strconv.Itoa(int(articleID)), upds)
+}
+
+func getArticleR(articleID uint) (article Article) {
+	res, _ := rdb.HGetAll(ctx, "articles:"+strconv.Itoa(int(articleID))).Result()
+	article.ID = articleID
+	article.Title = res["title"]
+	article.Content = res["content"]
+	article.Author = res["author"]
+	return
+}
+func getPopularArticlesR() (articles []Article) {
+	articleIDstrs, _ := rdb.SMembers(ctx, "cached_ids").Result()
+	for _, articleIDstr := range articleIDstrs {
+		articleID, _ := strconv.Atoi(articleIDstr)
+		res, _ := rdb.HGetAll(ctx, "articles:"+articleIDstr).Result()
+		var article Article
+		article.ID = uint(articleID)
+		article.Title = res["title"]
+		article.Content = res["content"]
+		article.Author = res["author"]
+		articles = append(articles, article)
+	}
+	return
+}
+
+func isCached(articleID uint) bool {
+	isCached, _ := rdb.SIsMember(ctx, "cached_ids", articleID).Result()
+	return isCached
 }
