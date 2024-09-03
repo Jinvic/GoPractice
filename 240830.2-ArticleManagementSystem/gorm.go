@@ -46,6 +46,10 @@ func updateArticle(articleID uint, upds map[string]interface{}) {
 	db.Model(&Article{}).Where("id = ?", articleID).Updates(upds)
 }
 
+func updateVisited(articleID uint, visited int) {
+	db.Model(&Article{}).Where("id = ?", articleID).Update("visited", visited)
+}
+
 func deleteArticle(articleID uint) {
 	db.Delete(&Article{}, articleID)
 }
