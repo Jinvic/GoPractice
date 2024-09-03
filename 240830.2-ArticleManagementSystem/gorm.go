@@ -54,13 +54,13 @@ func deleteArticle(articleID uint) {
 	db.Delete(&Article{}, articleID)
 }
 
-func visitArticle(times int, articleID uint) {
-	var visited int
-	db.Model(&Article{}).Select("visited").Find(&visited, articleID)
-	db.Model(&Article{}).Where("id = ?", articleID).Update("visited", visited+times)
-}
+// func visitArticle(times int, articleID uint) {
+// 	var visited int
+// 	db.Model(&Article{}).Select("visited").Find(&visited, articleID)
+// 	db.Model(&Article{}).Where("id = ?", articleID).Update("visited", visited+times)
+// }
 
-func popularArticles(num int) (articles []Article) {
-	db.Model(&Article{}).Order("visited DESC").Find(&articles).Limit(num)
-	return
-}
+// func popularArticles(num int) (articles []Article) {
+// 	db.Model(&Article{}).Order("visited DESC").Find(&articles).Limit(num)
+// 	return
+// }

@@ -59,7 +59,8 @@ func main() {
 		route.LoadHTMLGlob("./templates/*")
 		articleIDstr := ctx.Param("article_id")
 		articleID, _ := strconv.Atoi(articleIDstr)
-		article := getArticle(uint(articleID))
+		// article := getArticle(uint(articleID))
+		article := visitArticleR(uint(articleID))
 		ctx.HTML(http.StatusOK, "article.html", gin.H{
 			"article": article,
 		})

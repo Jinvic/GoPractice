@@ -48,6 +48,7 @@ func init() {
 	for _, idstr := range articleIDsToCache {
 		id, _ := strconv.Atoi(idstr)
 		rdb.HSet(ctx, "articles:"+string(id), articles[idtoi[uint(id)]])
+		rdb.SAdd(ctx, "cached_ids", uint(id))
 	}
 
 	// 定时任务自动同步
@@ -92,4 +93,50 @@ func syncVisited() {
 			break
 		}
 	}
+}
+
+// 定时更新缓存的文章
+func autoUpdateCachedArticles() {
+	ticker := time.NewTicker(1 * time.Hour)
+	defer ticker.Stop()
+
+	go func() {
+		for range ticker.C {
+			updateCachedArticles()
+		}
+	}()
+	select {}
+}
+
+// 进行一次更新
+func updateCachedArticles() {
+
+	// 获取访问最多的前n篇文章
+	articleIDsToCache, _ := rdb.ZRevRange(ctx, "visited", 0, 10).Result()
+	rdb.Del(ctx, "new_cache_ids")
+	for _, idstr := range articleIDsToCache {
+		id, _ := strconv.Atoi(idstr)
+		rdb.SAdd(ctx, "new_cache_ids", uint(id))
+	}
+
+	newCacheIDs, _ := rdb.SDiff(ctx, "new_cache_ids", "cached_ids").Result()
+	deleteIDs, _ := rdb.SDiff(ctx, "cached_ids", "new_cache_ids").Result()
+
+	// 从缓存中删除
+	for _, idstr := range deleteIDs {
+		rdb.Del(ctx, "articles:"+idstr)
+		rdb.SRem(ctx, "cached_ids", idstr)
+	}
+	// 添加到缓存
+	for _, idstr := range newCacheIDs {
+		rdb.Del(ctx, "articles:"+idstr)
+		id, _ := strconv.Atoi(idstr)
+		article := getArticle(uint(id))
+		rdb.HSet(ctx, "articles:"+idstr, article)
+		rdb.SAdd(ctx, "cached_ids", idstr)
+	}
+}
+
+func visitArticleR(articleID uint) {
+	rdb.ZIncrBy(ctx, "visited", 1.0, string(articleID))
 }
