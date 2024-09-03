@@ -79,9 +79,13 @@ func main() {
 		ctx.Redirect(http.StatusSeeOther, "/article/"+articleIDstr)
 	})
 
-	route.GET("/delete_article", func(ctx *gin.Context) {
-
+	route.GET("/delete_article/:article_id/", func(ctx *gin.Context) {
+		articleIDstr := ctx.Param("article_id")
+		articleID, _ := strconv.Atoi(articleIDstr)
+		deleteArticle(uint(articleID))
+		ctx.Redirect(http.StatusSeeOther, "/all_articles")
 	})
+
 	route.GET("/popular_articles", func(ctx *gin.Context) {
 
 	})
