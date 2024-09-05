@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主页页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .button-container {
+            display: flex;
+            gap: 1rem;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .login-button {
+            background-color: #007BFF;
+        }
+        .register-button {
+            background-color: #28a745;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container">
+        <button class="login-button" onclick="navigateTo('/message_page')">消息收发</button>
+        <button class="register-button" onclick="navigateTo('/profile')">个人信息</button>
+    </div>
+    <script>
+        function navigateTo(url) {
+            fetch(url, { method: 'GET' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    // 如果响应是重定向，则跟随重定向
+                    if (response.status >= 300 && response.status < 400) {
+                        window.location = response.url;
+                    } else {
+                        // 如果响应不是重定向，则直接跳转到 URL
+                        window.location.href = url;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('发生错误，请稍后再试。');
+                });
+        }
+    </script>
+</body>
+</html>

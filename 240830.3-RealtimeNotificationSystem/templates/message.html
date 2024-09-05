@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            height: 100%;
+        }
+
+        .channels-list {
+            width: 25%;
+            background-color: #f4f4f4;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .channels-list h2 {
+            margin-top: 0;
+        }
+
+        .channels-list ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .channels-list li {
+            padding: 5px 10px;
+            margin: 5px 0;
+            cursor: pointer;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+        }
+
+        .channels-list li.active {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        .message-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
+        }
+
+        .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #fff;
+        }
+
+        .message-input {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .message-input input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .message-input button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="channels-list">
+            <h2>频道列表</h2>
+            <ul>
+                {{ range .channels }}
+                <li data-channel="{{.}}">{{.}}</li>
+                {{ end }}
+            </ul>
+        </div>
+        <div class="message-area">
+            <div class="messages">
+                <p>欢迎来到聊天室！</p>
+            </div>
+            <div class="message-input">
+                <input type="text" placeholder="输入消息...">
+                <button>发送</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script>
+    var currentChannel
+    var msgs = new Map()
+    window.user = {{.user }};
+    window.channels = {{.channels }};
+    window.channels.forEach(channel => {
+        msgs.set(channel, '<p>这是' + channel + '频道的消息。<br>')
+    });
+
+    const channelsList = document.querySelector('.channels-list ul');
+    const messagesArea = document.querySelector('.messages');
+
+
+    // 更新消息区域
+    function updateMessages(channel) {
+        // messagesArea.innerHTML = `<p>这是 ${channel} 频道的消息。</p>`;
+        messagesArea.innerHTML = msgs.get(channel);
+        // 在实际应用中，这里应该从服务器获取消息并显示
+    }
+
+    // 切换频道
+    function switchChannel(event) {
+        const channel = event.target.getAttribute('data-channel');
+        if (channel) {
+            currentChannel = channel;
+            updateMessages(channel);
+
+            const activeChannel = document.querySelector('.channels-list ul .active');
+            if (activeChannel) {
+                activeChannel.classList.remove('active');
+            }
+            event.target.classList.add('active');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 添加事件监听器
+        channelsList.addEventListener('click', switchChannel);
+
+        // 页面加载时自动选中第一个频道
+        const firstChannelElement = document.querySelector('.channels-list ul li');
+        if (firstChannelElement) {
+            currentChannel = firstChannelElement.getAttribute('data-channel');
+            updateMessages(currentChannel);
+            firstChannelElement.click(); // 模拟点击事件
+        }
+    });
+</script>
+
+<script>
+    var ws = new WebSocket('ws://localhost:8080/ws');
+
+    ws.onopen = function () {
+        console.log('WebSocket connection opened!');
+    };
+
+    ws.onclose = function () {
+        console.log('WebSocket connection closed.');
+    };
+
+    ws.onmessage = function (event) {
+        console.log('receive message')
+        var data = JSON.parse(event.data);
+        let ch = data.channel
+        // document.getElementById('messages').innerHTML += 'Channel: ' + data.channel + ', Payload: ' + data.payload + '<br>';
+        // msgs[ch] += '<h6>' + data.user_name + '@' + data.user_id + '</h6><br><p>' + data.msg + '</p><br>'
+        str = msgs.get(ch)
+        str += data.user_name + '@' + data.user_id + ':<br>' + data.msg + '</p><br>'
+
+        msgs.set(ch, str)
+        updateMessages(ch)
+    };
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const messageInput = document.querySelector('.message-input input[type="text"]');
+        const sendButton = document.querySelector('.message-input button');
+
+        // 定义发送消息的函数
+        function sendMessage() {
+            console.log("send message")
+            const message = messageInput.value.trim();
+            if (message === '') {
+                alert('请输入消息内容！');
+                return;
+            }
+
+            // 构造请求体
+            const requestBody = {
+                msg: message,
+                user_id: user.ID,
+                user_name: user.Username,
+                channel: currentChannel
+            };
+
+            messageInput.value = ""
+
+            // 发送请求到后端
+            fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+        }
+
+        // 绑定点击事件
+        sendButton.addEventListener('click', sendMessage);
+    });
+</script>
