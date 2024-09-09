@@ -36,5 +36,12 @@ func main() {
 		})
 	})
 
+	// 2. **处理静态文件**
+	route.Static("/static", "./static")
+	route.LoadHTMLFiles("./templates/gin_doc.html")
+	route.GET("/gin_doc", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "gin_doc.html", nil)
+	})
+
 	route.Run(":8080")
 }
