@@ -57,5 +57,21 @@ func main() {
 		})
 	})
 
+	// 4. **表单提交**
+	route.GET("/form", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "form.html", nil)
+	})
+	route.POST("/post_form", func(ctx *gin.Context) {
+		field1 := ctx.PostForm("field1")
+		field2 := ctx.PostForm("field2")
+		field3 := ctx.PostForm("field3")
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"field1": field1,
+			"field2": field2,
+			"field3": field3,
+		})
+	})
+
 	route.Run(":8080")
 }
