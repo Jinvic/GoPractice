@@ -1,8 +1,12 @@
 package main
 
 import (
-	_ "fmt"
+	// "bytes"
+	"encoding/csv"
+	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +14,11 @@ import (
 
 func main() {
 	route := gin.Default()
+
+	// 5. **使用中间件**
+	route.Use(gin.Logger())
+	route.Use(gin.Recovery())
+	route.Use(saveRequest)
 
 	route.LoadHTMLGlob("./templates/*")
 	route.GET("/", func(ctx *gin.Context) {
@@ -74,4 +83,43 @@ func main() {
 	})
 
 	route.Run(":8080")
+}
+
+// 5. **使用中间件**
+func saveRequest(ctx *gin.Context) {
+	ctx.Next()
+	// //请求耗时
+	// cost := time.Since(start).Milliseconds()
+	// //响应状态码
+	// responseStatus := c.Writer.Status()
+	// //响应 header
+	// responseHeader := c.Writer.Header()
+	// //响应体大小
+	// responseBodySize := c.Writer.Size()
+	// //响应体 body
+	// responseBody := writer.b.String()
+
+	method := ctx.Request.Method
+	url := ctx.Request.URL.String()
+	status := strconv.Itoa(ctx.Writer.Status())
+	time := time.Now().Format("2006-01-02 15:04:05")
+
+	//OpenFile读取文件，不存在时则创建，使用追加模式
+	file, err := os.OpenFile("request.csv", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+	if err != nil {
+		log.Println("文件打开失败！")
+	}
+	defer file.Close()
+
+	//创建写入接口
+	WriterCsv := csv.NewWriter(file)
+	str := []string{method, url, status, time} //需要写入csv的数据，切片类型
+
+	//写入一条数据，传入数据为切片(追加模式)
+	err = WriterCsv.Write(str)
+	if err != nil {
+		log.Println("WriterCsv写入文件失败")
+	}
+	WriterCsv.Flush() //刷新，不刷新是无法写入的
+	log.Println("数据写入成功...")
 }
