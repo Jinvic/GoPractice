@@ -1,9 +1,7 @@
 package main
 
 import (
-	// "bytes"
 	"encoding/csv"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -93,9 +91,7 @@ func main() {
 		var fileList []string
 		// 单文件
 		singleFile, err := ctx.FormFile("file")
-		fmt.Println(err)
 		if err == nil {
-			fmt.Println(singleFile.Filename)
 			dst := "./files/" + singleFile.Filename
 			// 上传文件至指定的完整文件路径
 			ctx.SaveUploadedFile(singleFile, dst)
@@ -107,7 +103,6 @@ func main() {
 		if err == nil {
 			files := form.File["files"]
 			for _, file := range files {
-				log.Println(file.Filename)
 				// 上传文件至指定目录
 				dst := "./files/" + file.Filename
 				ctx.SaveUploadedFile(file, dst)
