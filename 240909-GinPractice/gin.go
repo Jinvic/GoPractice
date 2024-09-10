@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,7 +10,19 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
+
+// 2. **表单验证**
+type Info struct {
+	ID      uint   `form:"id" validate:"number,required"`
+	Name    string `form:"name" validate:"alphanum"`
+	Age     int    `form:"age" validate:"number,gte=12"`
+	Email   string `form:"email" validate:"printascii"`
+	// Website string `form:"website" validate:"url"`
+	Bio     string `form:"bio" validate:"printascii"`
+	IP      string `form:"ip" validate:"ip"`
+}
 
 func main() {
 	route := gin.Default()
@@ -119,6 +132,39 @@ func main() {
 			res = "no file uploaded."
 		}
 		ctx.String(http.StatusOK, res)
+	})
+
+	// z2. **表单验证**
+	route.GET("/form2", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "form2.html", nil)
+	})
+	route.POST("form_validate", func(ctx *gin.Context) {
+		var info Info
+		ctx.ShouldBind(&info)
+		fmt.Println(info)
+		var validate = validator.New()
+		err := validate.Struct(info)
+		// fmt.Println(err)
+		if err != nil {
+			res := ""
+			for _, err := range err.(validator.ValidationErrors) {
+				res += fmt.Sprintln(err)
+				// fmt.Println(err.Namespace()) //命名
+				// fmt.Println(err.Field())
+				// fmt.Println(err.StructNamespace())
+				// fmt.Println(err.StructField())
+				// fmt.Println(err.Tag())
+				// fmt.Println(err.ActualTag())
+				// fmt.Println(err.Kind())
+				// fmt.Println(err.Type())
+				// fmt.Println(err.Value())
+				// fmt.Println(err.Param())
+				// fmt.Println()
+			}
+			ctx.String(http.StatusOK, res)
+		} else {
+			ctx.String(http.StatusOK, "complete.")
+		}
 	})
 
 	route.Run(":8080")
