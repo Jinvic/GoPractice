@@ -3,6 +3,7 @@ package main
 import (
 	// "bytes"
 	"encoding/csv"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -80,6 +81,49 @@ func main() {
 			"field2": field2,
 			"field3": field3,
 		})
+	})
+
+	// z1. **文件上传**
+	// 为 multipart forms 设置较低的内存限制 (默认是 32 MiB)
+	route.MaxMultipartMemory = 8 << 20 // 8 MiB
+	route.GET("/file", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "file.html", nil)
+	})
+	route.POST("/upload_file", func(ctx *gin.Context) {
+		var fileList []string
+		// 单文件
+		singleFile, err := ctx.FormFile("file")
+		fmt.Println(err)
+		if err == nil {
+			fmt.Println(singleFile.Filename)
+			dst := "./files/" + singleFile.Filename
+			// 上传文件至指定的完整文件路径
+			ctx.SaveUploadedFile(singleFile, dst)
+			fileList = append(fileList, singleFile.Filename)
+		}
+
+		// Multipart form
+		form, err := ctx.MultipartForm()
+		if err == nil {
+			files := form.File["files"]
+			for _, file := range files {
+				log.Println(file.Filename)
+				// 上传文件至指定目录
+				dst := "./files/" + file.Filename
+				ctx.SaveUploadedFile(file, dst)
+				fileList = append(fileList, file.Filename)
+			}
+		}
+
+		res := "uploaded files:\n"
+		if len(fileList) > 0 {
+			for _, filename := range fileList {
+				res += filename + "\n"
+			}
+		} else {
+			res = "no file uploaded."
+		}
+		ctx.String(http.StatusOK, res)
 	})
 
 	route.Run(":8080")
