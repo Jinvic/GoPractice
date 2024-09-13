@@ -70,9 +70,9 @@
 
 3. **用户会话管理**
 
-   - **目标**：使用 `gin-contrib/sessions` 或类似库实现用户会话管理；用户登录后，将用户的 ID 存储在会话中，并在后续请求中检查会话是否存在。
+   - **目标**：使用 ~~`gin-contrib/sessions`~~ `gorilla/sessions` 或类似库实现用户会话管理；用户登录后，将用户的 ID 存储在会话中，并在后续请求中检查会话是否存在。
    - **实现步骤**：
-     - 安装并导入 `gin-contrib/sessions` 包。
+     - 安装并导入 ~~`gin-contrib/sessions`~~ `gorilla/sessions` 包。
      - 创建一个会话存储（如 Cookie）。
      - 创建一个登录路由，验证用户凭证并设置会话。
      - 创建一个受保护的路由，检查会话是否存在。

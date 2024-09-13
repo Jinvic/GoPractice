@@ -11,18 +11,24 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/sessions"
+	"github.com/jakehl/goid"
+	// "gopkg.in/boj/redistore.v1"
 )
 
 // 2. **表单验证**
 type Info struct {
-	ID      uint   `form:"id" validate:"number,required"`
-	Name    string `form:"name" validate:"alphanum"`
-	Age     int    `form:"age" validate:"number,gte=12"`
-	Email   string `form:"email" validate:"printascii"`
+	ID    uint   `form:"id" validate:"number,required"`
+	Name  string `form:"name" validate:"alphanum"`
+	Age   int    `form:"age" validate:"number,gte=12"`
+	Email string `form:"email" validate:"printascii"`
 	// Website string `form:"website" validate:"url"`
-	Bio     string `form:"bio" validate:"printascii"`
-	IP      string `form:"ip" validate:"ip"`
+	Bio string `form:"bio" validate:"printascii"`
+	IP  string `form:"ip" validate:"ip"`
 }
+
+// z3. **用户会话管理**
+var Store = sessions.NewFilesystemStore("./sessions", []byte("secret"))
 
 func main() {
 	route := gin.Default()
@@ -165,6 +171,87 @@ func main() {
 		} else {
 			ctx.String(http.StatusOK, "complete.")
 		}
+	})
+
+	// z3. **用户会话管理**
+	route.GET("/session_management", func(ctx *gin.Context) {
+		session, err := Store.Get(ctx.Request, "user")
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		userid := session.Values["userid"]
+		if session.ID != "" && userid != nil { // 已登录
+			username, password, err := userInfo(userid.(uint))
+			if err != nil {
+				ctx.String(http.StatusBadRequest, err.Error())
+				return
+			}
+			ctx.HTML(http.StatusOK, "logout.html", gin.H{
+				"userid":    userid,
+				"username":  username,
+				"password":  password,
+				"sessionid": session.ID,
+			})
+		} else { // 未登录
+			ctx.HTML(http.StatusOK, "login.html", nil)
+		}
+	})
+	// 登录
+	route.POST("/login", func(ctx *gin.Context) {
+		var user User
+		err := ctx.ShouldBind(&user)
+		if err != nil {
+			ctx.String(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		uid, err := login(user.Username, user.Password)
+		if err != nil {
+			ctx.String(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		// 记录会话
+		session, _ := Store.Get(ctx.Request, "user")
+		if session.ID == "" {
+			session.ID = goid.NewV4UUID().String()
+		}
+		session.Values["userid"] = uid
+		session.Save(ctx.Request, ctx.Writer)
+		ctx.Redirect(http.StatusSeeOther, "/session_management")
+	})
+	// 登出
+	route.GET("/logout", func(ctx *gin.Context) {
+		session, _ := Store.Get(ctx.Request, "user")
+		session.Options.MaxAge = -1
+		session.Save(ctx.Request, ctx.Writer)
+		ctx.Redirect(http.StatusSeeOther, "/session_management")
+	})
+	// 注册
+	route.GET("/regist", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusSeeOther, "regist.html", nil)
+	})
+	route.POST("/regist", func(ctx *gin.Context) {
+		var user User
+		err := ctx.ShouldBind(&user)
+		if err != nil {
+			ctx.String(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		uid, err := regist(user.Username, user.Password)
+		if err != nil {
+			ctx.String(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		// 记录会话
+		session, _ := Store.New(ctx.Request, "user")
+		session.ID = goid.NewV4UUID().String()
+		session.Values["userid"] = uid
+		session.Save(ctx.Request, ctx.Writer)
+		ctx.Redirect(http.StatusSeeOther, "/session_management")
 	})
 
 	route.Run(":8080")
