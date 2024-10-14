@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"blog-service/pkg/services"

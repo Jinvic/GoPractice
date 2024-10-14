@@ -1,11 +1,17 @@
 package services
 
-import(
-	"github.com/gin-gonic/gin"
+import (
+	"blog-service/pkg/config"
+	"blog-service/pkg/db"
 
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
-func Run(){
+func Run() {
+	config.InitConfig()
+	db.InitDB()
+
 	router := gin.Default()
-	router.Run()
+	router.Run(viper.GetString("server.port"))
 }
