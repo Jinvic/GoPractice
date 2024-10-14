@@ -3,12 +3,16 @@ package services
 import (
 	"blog-service/pkg/config"
 	"blog-service/pkg/db"
+	"blog-service/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 )
 
 func Run() {
+	logger.InitLogger()
+	defer logger.Logger.Sync()
+
 	config.InitConfig()
 	db.InitDB()
 

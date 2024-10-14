@@ -1,10 +1,11 @@
 package db
 
 import (
+	"blog-service/pkg/logger"
 	"fmt"
-	"log"
 
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -22,7 +23,8 @@ func InitDB() {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("Error connecting to database, %s", err)
+		logger.Logger.Error("Error connecting to database", zap.Error(err))
 	}
+	logger.Logger.Info("Successfully connected to database")
 	DB = db
 }

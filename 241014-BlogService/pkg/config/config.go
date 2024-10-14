@@ -1,9 +1,10 @@
 package config
 
 import (
-	"log"
+	"blog-service/pkg/logger"
 
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 func InitConfig() {
@@ -12,6 +13,7 @@ func InitConfig() {
 	viper.AddConfigPath("./pkg/config")
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalf("Error reading config file, %s", err)
+		logger.Logger.Error("Error reading config file", zap.Error(err))
 	}
+	logger.Logger.Info("Successfully read config file")
 }
