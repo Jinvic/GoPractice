@@ -2,6 +2,7 @@ package db
 
 import (
 	"blog-service/pkg/logger"
+	"blog-service/pkg/models"
 	"fmt"
 
 	"github.com/spf13/viper"
@@ -26,5 +27,12 @@ func InitDB() {
 		logger.Logger.Error("Error connecting to database", zap.Error(err))
 	}
 	logger.Logger.Info("Successfully connected to database")
+
+	err = db.AutoMigrate(&models.User{}, &models.Article{})
+	if err != nil {
+		logger.Logger.Error("Error migrating database", zap.Error(err))
+	}
+	logger.Logger.Info("Successfully migrated database")
+
 	DB = db
 }
