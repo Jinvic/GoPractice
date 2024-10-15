@@ -7,3 +7,6 @@ port = 3306
 user = "root"
 password = "root"
 database = "db241014_blog_service"
+
+[jwt]
+secret = "secret"

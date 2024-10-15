@@ -5,6 +5,7 @@ import (
 	"blog-service/pkg/define"
 	"blog-service/pkg/logger"
 	"blog-service/pkg/models"
+	"blog-service/pkg/services/auth"
 	"blog-service/pkg/services/user"
 	"net/http"
 
@@ -55,13 +56,21 @@ func register(c *gin.Context) {
 		Email:    req.Email,
 	}
 
-	if err := user.Register(&u); err != nil {
+	userInfo, err := user.Register(&u)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		logger.Logger.Error("Failed to register user", zap.Error(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
+	token, err := auth.GenerateToken(userInfo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		logger.Logger.Error("Failed to generate token", zap.Error(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token})
 	logger.Logger.Info("User registered successfully")
 }
 
