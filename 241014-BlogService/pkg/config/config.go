@@ -14,6 +14,7 @@ func InitConfig() {
 	err := viper.ReadInConfig()
 	if err != nil {
 		logger.Logger.Error("Error reading config file", zap.Error(err))
+		panic(err)
 	}
 	logger.Logger.Info("Successfully read config file")
 }

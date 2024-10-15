@@ -1,9 +1,9 @@
 package main
 
 import (
-	"blog-service/pkg/services"
+	"blog-service/internal"
 )
 
 func main() {
-	services.Run()
+	server.Run()
 }

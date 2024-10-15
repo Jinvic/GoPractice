@@ -4,6 +4,7 @@ import (
 	"blog-service/pkg/config"
 	"blog-service/pkg/db"
 	"blog-service/pkg/logger"
+	"blog-service/pkg/routes"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -17,5 +18,6 @@ func Run() {
 	db.InitDB()
 
 	router := gin.Default()
+	routes.InitRoutes(router)
 	router.Run(viper.GetString("server.port"))
 }

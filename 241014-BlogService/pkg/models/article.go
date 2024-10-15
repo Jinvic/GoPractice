@@ -9,5 +9,4 @@ type Article struct {
 	Title    string `gorm:"not null"`
 	Content  string `gorm:"not null"`
 	AuthorID int    `gorm:"not null"`
-	Author   User   `gorm:"foreignKey:AuthorID"`
 }
