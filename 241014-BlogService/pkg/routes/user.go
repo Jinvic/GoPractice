@@ -71,7 +71,7 @@ func register(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
-	logger.Logger.Info("User registered successfully")
+	logger.Logger.Info("User registered successfully", zap.Any("user", userInfo))
 }
 
 func login(c *gin.Context) {

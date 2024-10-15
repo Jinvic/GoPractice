@@ -10,3 +10,12 @@ database = "db241014_blog_service"
 
 [jwt]
 secret = "secret"
+
+[redis]
+host = "localhost"
+port = 6379
+password = ""
+database = 1
+prefix = "blog_service"
+sub_prefix1 = "user_token"
+sub_prefix2 = "banned_token"

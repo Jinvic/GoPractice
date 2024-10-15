@@ -4,6 +4,7 @@ import (
 	"blog-service/pkg/config"
 	"blog-service/pkg/db"
 	"blog-service/pkg/logger"
+	"blog-service/pkg/redis"
 	"blog-service/pkg/routes"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,7 @@ func Run() {
 
 	config.InitConfig()
 	db.InitDB()
+	redis.InitRedis()
 
 	router := gin.Default()
 	routes.InitRoutes(router)
