@@ -10,8 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func GenerateToken(userInfo *define.UserInfo) (string, error) {
-	expiredAt := time.Now().Add(time.Hour * 24)
+func GenerateToken(userInfo *define.UserInfo, expiredAt time.Time) (string, error) {
 	claims := define.UserClaims{
 		UserInfo: userInfo,
 		RegisteredClaims: &jwt.RegisteredClaims{
@@ -32,10 +31,10 @@ func GenerateToken(userInfo *define.UserInfo) (string, error) {
 		return "", err
 	}
 
-	err = SetToken(tokenString, userInfo.ID)
-	if err != nil {
-		return "", err
-	}
+	// err = SetToken(tokenString, userInfo.ID, expiredAt)
+	// if err != nil {
+	// 	return "", err
+	// }
 
 	return tokenString, nil
 }
@@ -44,7 +43,7 @@ func ParseToken(tokenString string) (*define.UserClaims, error) {
 	secret := viper.GetString("jwt.secret")
 	token, err := jwt.ParseWithClaims(tokenString, &define.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
-	})
+	}, jwt.WithValidMethods([]string{"HS256"}))
 	if err != nil {
 		return nil, err
 	}
@@ -54,13 +53,13 @@ func ParseToken(tokenString string) (*define.UserClaims, error) {
 		return nil, errors.New("invalid token claims")
 	}
 
-	banned, err := IsBannedToken(tokenString)
-	if err != nil {
-		return nil, err
-	}
-	if banned {
-		return nil, errors.New("token banned")
-	}
+	// banned, err := IsBanned(tokenString)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if banned {
+	// 	return nil, errors.New("token banned")
+	// }
 
 	return claims, nil
 }

@@ -19,3 +19,9 @@ database = 1
 prefix = "blog_service"
 sub_prefix1 = "user_token"
 sub_prefix2 = "banned_token"
+
+[token]
+[token.expired]
+hour = 0
+minute = 0
+second = 30

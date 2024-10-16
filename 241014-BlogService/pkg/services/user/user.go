@@ -5,6 +5,7 @@ import (
 	"blog-service/pkg/define"
 	"blog-service/pkg/logger"
 	"blog-service/pkg/models"
+	"errors"
 
 	"go.uber.org/zap"
 )
@@ -19,6 +20,24 @@ func Register(u *models.User) (*define.UserInfo, error) {
 		ID:       u.ID,
 		Username: u.Username,
 		Email:    u.Email,
+	}
+	return &userInfo, nil
+}
+
+func Login(username string, password string) (*define.UserInfo, error) {
+	logger.Logger.Info("Login user", zap.Any("user", username))
+	user := models.User{}
+	err := db.DB.Where("username = ?", username).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	if user.Password != password {
+		return nil, errors.New("password not match")
+	}
+	userInfo := define.UserInfo{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
 	}
 	return &userInfo, nil
 }

@@ -9,13 +9,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-
-func SetToken(tokenString string, userID uint) error {
+func SetToken(tokenString string, userID uint, expiredAt time.Time) error {
 	ctx := context.Background()
 	prefix := viper.GetString("redis.prefix")
 	sub_prefix := viper.GetString("redis.sub_prefix1")
 	key := fmt.Sprintf("%s:%s:%d", prefix, sub_prefix, userID)
-	err := redis.RDB.Set(ctx, key, tokenString, 0).Err()
+	err := redis.RDB.Set(ctx, key, tokenString, time.Until(expiredAt)).Err()
 	if err != nil {
 		return err
 	}
@@ -46,7 +45,7 @@ func BanToken(tokenString string, expiredAt time.Time) error {
 	return nil
 }
 
-func IsBannedToken(tokenString string) (bool, error) {
+func IsBanned(tokenString string) (bool, error) {
 	ctx := context.Background()
 	prefix := viper.GetString("redis.prefix")
 	sub_prefix := viper.GetString("redis.sub_prefix2")
@@ -56,4 +55,16 @@ func IsBannedToken(tokenString string) (bool, error) {
 		return false, err
 	}
 	return banned == "banned", nil
+}
+
+func HasToken(userID uint) (bool, error) {
+	ctx := context.Background()
+	prefix := viper.GetString("redis.prefix")
+	sub_prefix := viper.GetString("redis.sub_prefix1")
+	key := fmt.Sprintf("%s:%s:%d", prefix, sub_prefix, userID)
+	exists, err := redis.RDB.Exists(ctx, key).Result()
+	if err != nil {
+		return false, err
+	}
+	return exists > 0, nil
 }
