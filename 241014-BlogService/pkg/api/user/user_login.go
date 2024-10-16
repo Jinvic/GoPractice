@@ -43,7 +43,7 @@ func Login(c *gin.Context) {
 	}
 
 	// ban old token
-	err = banOldToken(userInfo)
+	err = banOldToken(userInfo.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		logger.Logger.Error("Failed to ban old token", zap.Any("position", "api"), zap.Error(err))
@@ -71,31 +71,3 @@ func Login(c *gin.Context) {
 	logger.Logger.Info("User logged in successfully", zap.Any("user_info", userInfo))
 }
 
-func banOldToken(userInfo *define.UserInfo) error {
-	// check if token already exists
-	if hasToken, err := auth.HasToken(userInfo.ID); err != nil {
-		logger.Logger.Error("Failed to check if token exists", zap.Any("position", "api"), zap.Error(err))
-		return err
-	} else if hasToken {
-		// ban old token
-		oldToken, err := auth.GetToken(userInfo.ID)
-		if err != nil {
-			logger.Logger.Error("Failed to get old token", zap.Any("position", "api"), zap.Error(err))
-			return err
-		}
-
-		claims, err := auth.ParseToken(oldToken)
-		if err != nil {
-			logger.Logger.Error("Failed to parse old token", zap.Any("position", "api"), zap.Error(err))
-			return err
-		}
-
-		err = auth.BanToken(oldToken, claims.RegisteredClaims.ExpiresAt.Time)
-		if err != nil {
-			logger.Logger.Error("Failed to ban old token", zap.Any("position", "api"), zap.Error(err))
-			return err
-		}
-	}
-
-	return nil
-}

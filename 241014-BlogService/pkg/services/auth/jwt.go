@@ -31,11 +31,6 @@ func GenerateToken(userInfo *define.UserInfo, expiredAt time.Time) (string, erro
 		return "", err
 	}
 
-	// err = SetToken(tokenString, userInfo.ID, expiredAt)
-	// if err != nil {
-	// 	return "", err
-	// }
-
 	return tokenString, nil
 }
 
@@ -52,14 +47,6 @@ func ParseToken(tokenString string) (*define.UserClaims, error) {
 	if !ok {
 		return nil, errors.New("invalid token claims")
 	}
-
-	// banned, err := IsBanned(tokenString)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// if banned {
-	// 	return nil, errors.New("token banned")
-	// }
 
 	return claims, nil
 }
