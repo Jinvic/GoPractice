@@ -2,6 +2,7 @@ package routes
 
 import (
 	"blog-service/pkg/api/user"
+	"blog-service/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,6 +12,9 @@ func registerUserRoutes(router *gin.Engine) {
 	{
 		userGroup.POST("/register", user.Register)
 		userGroup.POST("/login", user.Login)
+
+		userGroup.Use(middleware.AuthMiddleware())
 		userGroup.POST("/logout", user.Logout)
+		userGroup.DELETE("/delete", user.Delete)
 	}
 }

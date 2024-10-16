@@ -50,11 +50,12 @@ func IsBanned(tokenString string) (bool, error) {
 	prefix := viper.GetString("redis.prefix")
 	sub_prefix := viper.GetString("redis.sub_prefix2")
 	key := fmt.Sprintf("%s:%s:%s", prefix, sub_prefix, tokenString)
-	banned, err := redis.RDB.Get(ctx, key).Result()
+
+	exists, err := redis.RDB.Exists(ctx, key).Result()
 	if err != nil {
 		return false, err
 	}
-	return banned == "banned", nil
+	return exists != 0, nil
 }
 
 func HasToken(userID uint) (bool, error) {

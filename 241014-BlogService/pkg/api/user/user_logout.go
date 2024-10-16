@@ -18,7 +18,7 @@ func Logout(c *gin.Context) {
 		logger.Logger.Error("token not provided", zap.Any("position", "api"))
 		return
 	}
-	err := banOldToken(userInfo.(define.UserInfo).ID)
+	err := banOldToken(userInfo.(*define.UserInfo).ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to logout"})
 		logger.Logger.Error("Failed to logout", zap.Any("position", "api"), zap.Error(err))

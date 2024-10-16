@@ -41,3 +41,12 @@ func Login(username string, password string) (*define.UserInfo, error) {
 	}
 	return &userInfo, nil
 }
+
+func Delete(userInfo *define.UserInfo) error {
+	logger.Logger.Info("Delete user", zap.Any("user", userInfo))
+	err := db.DB.Where("id = ?", userInfo.ID).Unscoped().Delete(&models.User{}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

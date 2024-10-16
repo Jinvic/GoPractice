@@ -19,6 +19,18 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		if isBanned, err := auth.IsBanned(tokenString); err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "failed to check token"})
+			logger.Logger.Error("failed to check token", zap.Any("position", "middleware"), zap.Error(err))
+			c.Abort()
+			return
+		} else if isBanned {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "token is banned"})
+			logger.Logger.Error("token is banned", zap.Any("position", "middleware"))
+			c.Abort()
+			return
+		}
+
 		claims, err := auth.ParseToken(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})

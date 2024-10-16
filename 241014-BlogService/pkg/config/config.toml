@@ -23,5 +23,5 @@ sub_prefix2 = "banned_token"
 [token]
 [token.expired]
 hour = 0
-minute = 0
-second = 30
+minute = 3
+second = 0
