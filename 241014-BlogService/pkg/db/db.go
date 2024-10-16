@@ -24,17 +24,17 @@ func InitDB() {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		logger.Logger.Error("Error connecting to database", zap.Error(err))
+		logger.Logger.Error("Error connecting to database", zap.Any("position", "init"), zap.Error(err))
 		panic(err)
 	}
-	logger.Logger.Info("Successfully connected to database")
+	logger.Logger.Info("Successfully connected to database", zap.Any("position", "init"))
 
 	err = db.AutoMigrate(&models.User{}, &models.Article{})
 	if err != nil {
-		logger.Logger.Error("Error migrating database", zap.Error(err))
+		logger.Logger.Error("Error migrating database", zap.Any("position", "init"), zap.Error(err))
 		panic(err)
 	}
-	logger.Logger.Info("Successfully migrated database")
+	logger.Logger.Info("Successfully migrated database", zap.Any("position", "init"))
 
 	DB = db
 }

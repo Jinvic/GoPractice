@@ -13,8 +13,8 @@ func InitConfig() {
 	viper.AddConfigPath("./pkg/config")
 	err := viper.ReadInConfig()
 	if err != nil {
-		logger.Logger.Error("Error reading config file", zap.Error(err))
+		logger.Logger.Error("Error reading config file", zap.Any("position", "init"), zap.Error(err))
 		panic(err)
 	}
-	logger.Logger.Info("Successfully read config file")
+	logger.Logger.Info("Successfully read config file", zap.Any("position", "init"))
 }

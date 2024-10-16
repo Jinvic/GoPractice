@@ -25,29 +25,29 @@ func Register(c *gin.Context) {
 	req := define.UserRegisterReq{}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		logger.Logger.Error("Failed to bind JSON", zap.Error(err))
+		logger.Logger.Error("Failed to bind JSON", zap.Any("position", "api"), zap.Error(err))
 		return
 	}
 
 	// check if username already exists
 	if ok, err := checkDuplicateUsername(req.Username); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		logger.Logger.Error("Failed to check duplicate username", zap.Error(err))
+		logger.Logger.Error("Failed to check duplicate username", zap.Any("position", "api"), zap.Error(err))
 		return
 	} else if ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Username already exists"})
-		logger.Logger.Error("Username already exists")
+		logger.Logger.Error("Username already exists", zap.Any("position", "api"))
 		return
 	}
 
 	// check if email already exists
 	if ok, err := checkDuplicateEmail(req.Email); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		logger.Logger.Error("Failed to check duplicate email", zap.Error(err))
+		logger.Logger.Error("Failed to check duplicate email", zap.Any("position", "api"), zap.Error(err))
 		return
 	} else if ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Email already exists"})
-		logger.Logger.Error("Email already exists")
+		logger.Logger.Error("Email already exists", zap.Any("position", "api"))
 		return
 	}
 
@@ -61,10 +61,10 @@ func Register(c *gin.Context) {
 	userInfo, err := user.Register(&u)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		logger.Logger.Error("Failed to register user", zap.Error(err))
+		logger.Logger.Error("Failed to register user", zap.Any("position", "api"), zap.Error(err))
 		return
 	}
 
 	c.String(http.StatusOK, "User registered successfully")
-	logger.Logger.Info("User registered successfully", zap.Any("user", userInfo))
+	logger.Logger.Info("User registered successfully", zap.Any("position", "api"), zap.Any("user", userInfo))
 }

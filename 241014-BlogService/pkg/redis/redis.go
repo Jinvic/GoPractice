@@ -22,8 +22,8 @@ func InitRedis() {
 	ctx := context.Background()
 	_, err := RDB.Ping(ctx).Result()
 	if err != nil {
-		logger.Logger.Error("Error connecting to Redis", zap.Error(err))
+		logger.Logger.Error("Error connecting to Redis", zap.Any("position", "init"), zap.Error(err))
 		panic(err)
 	}
-	logger.Logger.Info("Successfully connected to Redis")
+	logger.Logger.Info("Successfully connected to Redis", zap.Any("position", "init"))
 }
