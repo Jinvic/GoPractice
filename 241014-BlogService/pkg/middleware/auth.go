@@ -57,3 +57,9 @@ func AdminMiddleware() gin.HandlerFunc {
 		}
 	}
 }
+
+func OwnershipMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+	}
+}

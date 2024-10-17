@@ -16,5 +16,5 @@ func List(c *gin.Context) {
 		logger.Logger.Error("List users failed", zap.Any("error", err))
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": userInfos})
+	c.JSON(http.StatusOK, gin.H{"data": userInfos, "total": len(*userInfos)})
 }
