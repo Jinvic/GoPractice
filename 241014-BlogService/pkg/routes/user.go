@@ -16,5 +16,8 @@ func registerUserRoutes(router *gin.Engine) {
 		userGroup.Use(middleware.AuthMiddleware())
 		userGroup.POST("/logout", user.Logout)
 		userGroup.DELETE("/delete", user.Delete)
+
+		userGroup.Use(middleware.AdminMiddleware())
+		userGroup.GET("/list", user.List)
 	}
 }

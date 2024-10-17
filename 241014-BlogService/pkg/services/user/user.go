@@ -50,3 +50,21 @@ func Delete(userInfo *define.UserInfo) error {
 	}
 	return nil
 }
+
+func List() (*[]define.UserInfo, error) {
+	logger.Logger.Info("List users")
+	users := []models.User{}
+	err := db.DB.Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	userInfos := []define.UserInfo{}
+	for _, user := range users {
+		userInfos = append(userInfos, define.UserInfo{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		})
+	}
+	return &userInfos, nil
+}
