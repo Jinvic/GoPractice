@@ -12,15 +12,18 @@ func registerArticleRoutes(router *gin.Engine) {
 	{
 		articleGroup.GET("/view/:id", article.View)
 
-		articleGroup.Use(middleware.AuthMiddleware())
-		articleGroup.POST("/create", article.Create)
-		articleGroup.GET("/list", article.List)
+		authGroup := articleGroup.Group("/", middleware.AuthMiddleware())
 		{
-			articleGroup.Use(middleware.OwnershipMiddleware())
-			articleGroup.PUT("/edit/:id", article.Edit)
-			articleGroup.DELETE("/delete/:id", article.Delete)
+			authGroup.POST("/create", article.Create)
+			authGroup.GET("/list", article.List)
+
+			ownershipGroup := authGroup.Group("/", middleware.OwnershipMiddleware())
+			{
+				ownershipGroup.PUT("/edit/:id", article.Edit)
+				ownershipGroup.DELETE("/delete/:id", article.Delete)
+			}
+
+			authGroup.GET("/list_all", article.ListAll, middleware.AdminMiddleware())
 		}
-		articleGroup.Use(middleware.AdminMiddleware())
-		articleGroup.GET("/list_all", article.ListAll)
 	}
 }

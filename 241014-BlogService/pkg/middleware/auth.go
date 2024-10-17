@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"blog-service/pkg/logger"
+	"blog-service/pkg/services/article"
 	"blog-service/pkg/services/auth"
 	"blog-service/pkg/shared"
 	"net/http"
@@ -67,6 +68,37 @@ func AdminMiddleware() gin.HandlerFunc {
 
 func OwnershipMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		userInfo, err := shared.GetUserInfo(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user info not found"})
+			logger.Logger.Error("user info not found", zap.Any("position", "middleware"), zap.Error(err))
+			c.Abort()
+			return
+		}
+
+		articleID, err := shared.GetArticleID(c)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid article id"})
+			logger.Logger.Error("invalid article id", zap.Any("position", "middleware"), zap.Error(err))
+			c.Abort()
+			return
+		}
+
+		authorID, err := article.GetAuthorID(articleID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get author id"})
+			logger.Logger.Error("failed to get author id", zap.Any("position", "middleware"), zap.Error(err))
+			c.Abort()
+			return
+		}
+
+		if userInfo.ID != authorID {
+			c.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})
+			logger.Logger.Error("permission denied", zap.Any("position", "middleware"))
+			c.Abort()
+			return
+		}
+
 		c.Next()
 	}
 }

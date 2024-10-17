@@ -44,10 +44,10 @@ func View(id uint) (*define.ArticleInfo, error) {
 	return &articleInfo, nil
 }
 
-func Edit(req *define.ArticleEditReq) error {
-	logger.Logger.Info("Edit article", zap.Any("article", req))
+func Edit(aid uint, req *define.ArticleEditReq) error {
+	logger.Logger.Info("Edit article", zap.Any("article_id", aid), zap.Any("article", req))
 	article := models.Article{}
-	article.ID = req.ID
+	article.ID = aid
 	article.Title = req.Title
 	article.Content = req.Content
 	err := db.DB.Updates(&article).Error
@@ -116,4 +116,15 @@ func ListAll() (*[]define.ArticleInfo, error) {
 		articleInfos = append(articleInfos, articleInfo)
 	}
 	return &articleInfos, nil
+}
+
+func GetAuthorID(aid uint) (uint, error) {
+	logger.Logger.Info("Get author id", zap.Any("article_id", aid))
+	article := models.Article{}
+	article.ID = aid
+	err := db.DB.First(&article).Error
+	if err != nil {
+		return 0, err
+	}
+	return article.AuthorID, nil
 }

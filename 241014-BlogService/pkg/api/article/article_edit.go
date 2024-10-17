@@ -4,6 +4,7 @@ import (
 	"blog-service/pkg/define"
 	"blog-service/pkg/logger"
 	"blog-service/pkg/services/article"
+	"blog-service/pkg/shared"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,14 @@ func Edit(c *gin.Context) {
 		return
 	}
 
-	err = article.Edit(&req)
+	articleID, err := shared.GetArticleID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		logger.Logger.Error("invalid article id", zap.Any("position", "api"), zap.Error(err))
+		return
+	}
+
+	err = article.Edit(articleID, &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		logger.Logger.Error("failed to edit article", zap.Any("position", "api"), zap.Error(err))
@@ -28,5 +36,5 @@ func Edit(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "article edited"})
-	logger.Logger.Info("article edited", zap.Any("article_id", req.ID))
+	logger.Logger.Info("article edited", zap.Any("article_id", articleID))
 }
