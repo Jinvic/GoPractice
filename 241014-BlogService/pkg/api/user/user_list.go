@@ -17,4 +17,5 @@ func List(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": userInfos, "total": len(*userInfos)})
+	logger.Logger.Info("List users successfully", zap.Any("total", len(*userInfos)))
 }

@@ -1,8 +1,8 @@
 package user
 
 import (
-	"blog-service/pkg/define"
 	"blog-service/pkg/logger"
+	"blog-service/pkg/shared"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,13 +12,14 @@ import (
 func Logout(c *gin.Context) {
 	logger.Logger.Info("Logout user")
 
-	userInfo, ok := c.Get("user_info")
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "token not provided"})
-		logger.Logger.Error("token not provided", zap.Any("position", "api"))
+	userInfo, err := shared.GetUserInfo(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user info not found"})
+		logger.Logger.Error("user info not found", zap.Any("position", "api"), zap.Error(err))
 		return
 	}
-	err := banOldToken(userInfo.(*define.UserInfo).ID)
+
+	err = banOldToken(userInfo.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to logout"})
 		logger.Logger.Error("Failed to logout", zap.Any("position", "api"), zap.Error(err))

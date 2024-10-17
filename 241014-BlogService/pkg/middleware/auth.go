@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"blog-service/pkg/define"
 	"blog-service/pkg/logger"
 	"blog-service/pkg/services/auth"
+	"blog-service/pkg/shared"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -47,8 +47,15 @@ func AuthMiddleware() gin.HandlerFunc {
 
 func AdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userInfo, _ := c.Get("user_info")
-		if userInfo.(*define.UserInfo).IsAdmin() {
+		userInfo, err := shared.GetUserInfo(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user info not found"})
+			logger.Logger.Error("user info not found", zap.Any("position", "middleware"), zap.Error(err))
+			c.Abort()
+			return
+		}
+
+		if userInfo.IsAdmin() {
 			c.Next()
 		} else {
 			c.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})

@@ -1,9 +1,9 @@
 package user
 
 import (
-	"blog-service/pkg/define"
 	"blog-service/pkg/logger"
 	"blog-service/pkg/services/user"
+	"blog-service/pkg/shared"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,20 +12,14 @@ import (
 
 func Delete(c *gin.Context) {
 	logger.Logger.Info("Delete user")
-	userInfoAny, ok := c.Get("user_info")
-	if !ok {
+	userInfo, err := shared.GetUserInfo(c)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "user info not found"})
-		logger.Logger.Error("user info not found", zap.Any("position", "api"))
-		return
-	}
-	userInfo, ok := userInfoAny.(*define.UserInfo)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "user info not found"})
-		logger.Logger.Error("user info not found", zap.Any("position", "api"))
+		logger.Logger.Error("user info not found", zap.Any("position", "api"), zap.Error(err))
 		return
 	}
 
-	err := banOldToken(userInfo.ID)
+	err = banOldToken(userInfo.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		logger.Logger.Error("Failed to ban old token", zap.Any("position", "api"), zap.Error(err))
