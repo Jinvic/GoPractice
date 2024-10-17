@@ -16,3 +16,7 @@ type UserLoginReq struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
+func (ui UserInfo) IsAdmin() bool {
+	return ui.Username == "admin"
+}

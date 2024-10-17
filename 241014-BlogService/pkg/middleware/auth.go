@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"blog-service/pkg/define"
 	"blog-service/pkg/logger"
 	"blog-service/pkg/services/auth"
 	"net/http"
@@ -41,5 +42,18 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		c.Set("user_info", claims.UserInfo)
 		c.Next()
+	}
+}
+
+func AdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userInfo, _ := c.Get("user_info")
+		if userInfo.(*define.UserInfo).IsAdmin() {
+			c.Next()
+		} else {
+			c.JSON(http.StatusForbidden, gin.H{"error": "permission denied"})
+			logger.Logger.Error("permission denied", zap.Any("position", "middleware"))
+			c.Abort()
+		}
 	}
 }
