@@ -14,5 +14,6 @@ func InitTodoRouter(r *gin.Engine) {
 		todo.GET("/:id", api.TodoApi.Get)
 		todo.PUT("/", api.TodoApi.Update)
 		todo.DELETE("/:id", api.TodoApi.Delete)
+		todo.PATCH("/:id", api.TodoApi.Complete)
 	}
 }

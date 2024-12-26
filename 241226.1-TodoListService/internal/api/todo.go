@@ -81,3 +81,19 @@ func (a *todoApi) Delete(c *gin.Context) {
 	}
 	Success(c)
 }
+
+func (a *todoApi) Complete(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := cast.ToIntE(idStr)
+	if err != nil {
+		FailError(c, e.PARAM_ERROR)
+		return
+	}
+
+	err = service.TodoService.Complete(id)
+	if err != nil {
+		FailError(c, err)
+		return
+	}
+	Success(c)
+}

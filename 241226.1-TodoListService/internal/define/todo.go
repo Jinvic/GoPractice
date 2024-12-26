@@ -11,8 +11,9 @@ type Todo struct {
 }
 
 type TodoListItem struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID        int    `json:"id"`
+	Title     string `json:"title"`
+	Completed bool   `json:"completed"`
 }
 
 type GetListRsp struct {
