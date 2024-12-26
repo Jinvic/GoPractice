@@ -23,7 +23,8 @@ func (d *todoDao) GetList() *[]model.Todo {
 func (d *todoDao) Create(todo *model.Todo) {
 	db.Mu.Lock()
 	defer db.Mu.Unlock()
-	db.DB[db.Idx+1] = *todo
+	todo.ID = db.Idx
+	db.DB[db.Idx] = *todo
 	db.Idx++
 }
 

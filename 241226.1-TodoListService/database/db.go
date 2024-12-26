@@ -8,4 +8,4 @@ import (
 var Mu sync.Mutex
 var RMu sync.RWMutex
 var DB = make(map[int]model.Todo)
-var Idx = 0
+var Idx = 1
