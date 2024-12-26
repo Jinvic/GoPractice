@@ -1,21 +1,22 @@
 package e
 
 type Err struct {
-	code int
-	msg  string
+	Code int
+	Msg  string
 }
 
 func New(code int, msg string) Err {
 	return Err{
-		code: code,
-		msg:  msg,
+		Code: code,
+		Msg:  msg,
 	}
 }
 
 func (e Err) Error() string {
-	return e.msg
+	return e.Msg
 }
 
 var (
-	DATA_NOT_EXIST = Err{10001, "data not exist"}
+	DATA_NOT_EXIST = Err{10001, "数据不存在"}
+	PARAM_ERROR   = Err{10002, "参数错误"}
 )
