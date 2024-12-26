@@ -7,5 +7,6 @@ import (
 func InitRouter() *gin.Engine {
 	r := gin.Default()
 	InitTodoRouter(r)
+	InitSwaggerRouter(r)
 	return r
 }

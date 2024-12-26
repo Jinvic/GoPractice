@@ -5,4 +5,5 @@
 - [ ] zap日志
 - [ ] id改用uuid
 - [ ] wire依赖注入
-- [ ] swagger
+- [ ] swagger文档
+- [ ] viper日志

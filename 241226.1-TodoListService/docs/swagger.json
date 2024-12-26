@@ -1,0 +1,303 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/todo": {
+            "put": {
+                "description": "更新待办事项的信息",
+                "tags": [
+                    "Todo"
+                ],
+                "summary": "更新待办事项",
+                "parameters": [
+                    {
+                        "description": "待办事项信息",
+                        "name": "todo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/define.Todo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/define.CommonSuccessRsp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/define.CommonFailRsp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "创建一个新的待办事项",
+                "tags": [
+                    "Todo"
+                ],
+                "summary": "创建待办事项",
+                "parameters": [
+                    {
+                        "description": "待办事项信息",
+                        "name": "todo",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/define.Todo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/define.CommonSuccessRsp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/define.CommonFailRsp"
+                        }
+                    }
+                }
+            }
+        },
+        "/todo/list": {
+            "get": {
+                "description": "获取所有待办事项的列表",
+                "tags": [
+                    "Todo"
+                ],
+                "summary": "获取待办事项列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/define.CommonSeccessDataRsp"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/define.GetListRsp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/define.CommonFailRsp"
+                        }
+                    }
+                }
+            }
+        },
+        "/todo/{id}": {
+            "get": {
+                "description": "根据ID获取待办事项",
+                "tags": [
+                    "Todo"
+                ],
+                "summary": "获取待办事项",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "待办事项ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/define.CommonSeccessDataRsp"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/define.Todo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/define.CommonFailRsp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "根据ID删除待办事项",
+                "tags": [
+                    "Todo"
+                ],
+                "summary": "删除待办事项",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "待办事项ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/define.CommonSuccessRsp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/define.CommonFailRsp"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "根据ID标记待办事项为完成",
+                "tags": [
+                    "Todo"
+                ],
+                "summary": "完成待办事项",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "待办事项ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/define.CommonSuccessRsp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/define.CommonFailRsp"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "define.CommonFailRsp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "errmsg": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer",
+                    "default": 0
+                }
+            }
+        },
+        "define.CommonSeccessDataRsp": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "status": {
+                    "type": "integer",
+                    "default": 1
+                }
+            }
+        },
+        "define.CommonSuccessRsp": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer",
+                    "default": 1
+                }
+            }
+        },
+        "define.GetListRsp": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/define.TodoListItem"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "define.Todo": {
+            "type": "object",
+            "properties": {
+                "completed": {
+                    "type": "boolean"
+                },
+                "completed_at": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "define.TodoListItem": {
+            "type": "object",
+            "properties": {
+                "completed": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

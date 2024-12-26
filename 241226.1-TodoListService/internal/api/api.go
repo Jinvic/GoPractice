@@ -22,13 +22,13 @@ func SuccessData(c *gin.Context, Data interface{}) {
 
 func FailError(c *gin.Context, err error) {
 	if err2, ok := err.(e.Err); ok {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"status": 0,
 			"code":   err2.Code,
 			"errmsg": err2.Msg,
 		})
 	} else {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"status": 0,
 			"errmsg": err.Error(),
 		})
